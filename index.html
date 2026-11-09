@@ -105,6 +105,8 @@ const SUPABASE_URL = 'https://kxohphviyntmvwnbxyqu.supabase.co';
 // Public (anon) key: safe to publish. All access is enforced by the database's row-level security.
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4b2hwaHZpeW50bXZ3bmJ4eXF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwODUwMzQsImV4cCI6MjEwOTY2MTAzNH0.NPvYI9FYBGTXtwX3GzTfvHgEtq9C7dZoU6MkwM3eZKU';
 const CYCLE_LABEL = '2026', PRIOR_LABEL = '2025';
+// Testing only: lets the team sign in with a password instead of an email. Set to false before partners are invited.
+const TEST_PASSWORD_SIGNIN = true;
 
 const TOPICS = [
   { id: 'msg', label: 'Tailoring messaging to high-risk communities', q: 'Which organizations or individuals do you go to when you want assistance making outreach messaging more culturally or linguistically relevant for communities you serve?' },
@@ -168,6 +170,13 @@ async function init() {
   }
   const { data } = await sb.auth.getSession();
   if (data.session) await afterSignIn(); else setView('signin');
+}
+async function pwSignIn() {
+  const email = (document.getElementById('em').value || '').trim().toLowerCase(), password = document.getElementById('pw').value;
+  S.email = email; S.pwError = '';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { S.pwError = /invalid/i.test(error.message) ? 'That email and password do not match.' : error.message; return render(); }
+  if (!S.access) await afterSignIn();
 }
 async function verifyCode() {
   const code = (document.getElementById('code').value || '').replace(/\D/g, '');
@@ -414,7 +423,11 @@ const viewSignin = () => `<div class="center"><div class="panel narrow">
   <div class="field"><label class="lbl" for="em">Work email</label>
   <input id="em" class="txt" type="email" autocomplete="email" placeholder="name@yourorganization.org" value="${esc(S.email)}" data-enter="send-link">
   ${S.emailError ? `<p class="err">${esc(S.emailError)}</p>` : ''}</div>
-  <button class="btn primary" data-action="send-link">Email me a sign-in link</button></div></div>`;
+  <button class="btn primary" data-action="send-link">Email me a sign-in link</button>
+  ${TEST_PASSWORD_SIGNIN ? (S.showPw ? `<div class="field" style="border-top:1px solid #E6EAE8;padding-top:16px"><label class="lbl" for="pw">Test password</label>
+    <input id="pw" class="txt" type="password" autocomplete="current-password" data-enter="pw-signin">
+    ${S.pwError ? `<p class="err">${esc(S.pwError)}</p>` : ''}
+    <button class="btn" data-action="pw-signin">Sign in with password</button></div>` : `<button class="linkbtn small" data-action="show-pw">Team testing: sign in with a password</button>`) : ''}</div></div>`;
 const viewCheck = () => `<div class="center"><div class="panel narrow"><h1>Check your email</h1>
   <p>We sent an email to <strong>${esc(S.email)}</strong> with a sign-in link and a code. Click the link, or type the code here.</p>
   <div class="field"><label class="lbl" for="code">Code from the email</label>
@@ -645,6 +658,8 @@ document.addEventListener('click', async e => {
     case 'send-link': return sendLink();
     case 'to-signin': S.emailError = ''; S.codeError = ''; return setView('signin');
     case 'verify-code': return verifyCode();
+    case 'show-pw': S.showPw = true; render(); document.getElementById('pw').focus(); return;
+    case 'pw-signin': return pwSignIn();
     case 'send-link-again': { const { error } = await sb.auth.signInWithOtp({ email: S.email, options: { emailRedirectTo: location.origin + location.pathname } }); S.codeError = error ? error.message : 'A new email is on its way. Use the newest code.'; return render(); }
     case 'signout': return signOut();
     case 'choose-org': try { await q(sb.rpc('choose_organization', { p_org: id }), 'Saving your choice'); S.access.status = 'pending'; setView('pending'); } catch (err) { toast(err.message); } return;
@@ -699,6 +714,7 @@ document.addEventListener('focusout', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'send-link') { e.preventDefault(); sendLink(); }
   if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'verify-code') { e.preventDefault(); verifyCode(); }
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'pw-signin') { e.preventDefault(); pwSignIn(); }
 });
 
 init();
