@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listos California Partner Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F4F5F3;color:#1C2629;font-family:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5}
+h1,h2,h3,p{margin:0}
+a{color:#0B6763}
+h1{font-size:28px;line-height:1.2;font-weight:700}
+h2{font-size:22px;line-height:1.25;font-weight:700}
+h3{font-size:16px;font-weight:600}
+.muted{color:#56636A}.small{font-size:14px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#56636A}
+.adminbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 20px;background:#22292B;color:#E9EEEC;font-size:14px}
+.adminbar strong{color:#F2C48D;letter-spacing:.04em;text-transform:uppercase;font-size:12px}
+.adminbar input{font:inherit;font-size:14px;padding:6px 10px;border-radius:6px;border:1px solid #4A5457;background:#2E3638;color:#fff;min-width:240px;min-height:36px}
+.adminbar .res{display:flex;flex-wrap:wrap;gap:6px}
+.adminbar button{font:inherit;font-size:13px;padding:6px 10px;min-height:36px;border-radius:6px;border:1px solid #4A5457;background:transparent;color:#E9EEEC;cursor:pointer}
+.brand{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:16px 24px;background:#fff;border-bottom:1px solid #D9DEDC}
+.brand-name{font-weight:700;font-size:17px}.brand-sub{color:#56636A;font-size:14px}
+.page{max-width:1160px;margin:0 auto;padding:28px 20px 64px}
+.center{display:flex;justify-content:center;padding:56px 16px 80px}
+.panel{background:#fff;border:1px solid #D9DEDC;border-radius:12px;padding:28px}
+.narrow{width:100%;max-width:480px;display:flex;flex-direction:column;gap:16px}
+.stack{display:flex;flex-direction:column;gap:16px}
+label.lbl,.lbl{font-weight:600;font-size:14px}
+.txt{font:inherit;width:100%;padding:10px 12px;border:1px solid #9AA6A3;border-radius:8px;background:#fff;color:#1C2629;min-height:44px}
+.txt:focus{outline:2px solid #0B6763;outline-offset:1px}
+.btn{font:inherit;font-size:15px;font-weight:600;padding:10px 18px;min-height:44px;border-radius:8px;border:1px solid #9AA6A3;background:#fff;color:#1C2629;cursor:pointer}
+.btn:hover{background:#EEF1EF}.btn:disabled{opacity:.55;cursor:default}
+.btn.primary{background:#0B6763;border-color:#0B6763;color:#fff}.btn.primary:hover{background:#084C49}
+.btn.sm{font-size:14px;padding:6px 12px;min-height:40px}
+.btn.amber{background:#9A4A08;border-color:#9A4A08;color:#fff}
+.linkbtn{font:inherit;font-size:14px;background:none;border:none;color:#0B6763;text-decoration:underline;cursor:pointer;padding:8px 0;min-height:40px}
+.err{color:#A1302A;font-size:14px}
+.hint{font-size:13px;color:#56636A;background:#F4F5F3;border-radius:8px;padding:10px 12px}
+.orghead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}
+.status{font-size:14px;font-weight:600;padding:6px 12px;border-radius:999px;background:#E6EAE8}
+.status-prog{background:#E3F0EE;color:#084C49}.status-done{background:#0B6763;color:#fff}
+.grid2{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.col-main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.col-side{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.box{border-radius:10px;padding:14px 16px;background:#E3F0EE;color:#084C49}
+.box-amber{background:#FCEFD9;color:#6E3506}.box-red{background:#F3E1DF;color:#7C231E}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.person{display:flex;flex-direction:column;border-top:1px solid #E6EAE8;padding-top:10px}
+.logitem{display:flex;flex-direction:column;gap:2px;font-size:14px;border-top:1px solid #E6EAE8;padding-top:8px;overflow-wrap:anywhere}
+.logtime{color:#56636A;font-size:13px}
+.person{overflow-wrap:anywhere}
+.consent{background:#F4F5F3;border-radius:8px;padding:12px 14px;font-size:14px}
+.content{width:100%;max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px;background:#fff;border:1px solid #D9DEDC;border-radius:12px;padding:28px}
+.progress{display:flex;flex-direction:column;gap:8px}
+.bar{height:6px;border-radius:999px;background:#E6EAE8;overflow:hidden}.bar-fill{height:6px;background:#0B6763;border-radius:999px}
+.jump{width:auto;min-height:40px;padding:6px 10px;font-size:14px}
+.field{display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:14px;padding:8px 14px;min-height:40px;border-radius:999px;border:1px solid #9AA6A3;background:#fff;color:#1C2629;cursor:pointer}
+.chip-on{background:#0B6763;border-color:#0B6763;color:#fff}
+.chip-full{color:#56636A;border-style:dashed;cursor:not-allowed}
+.county{display:inline-flex;align-items:center;gap:4px;font-size:14px;padding:4px 4px 4px 14px;border-radius:999px;background:#0B6763;color:#fff}
+.county button{font:inherit;background:transparent;border:none;color:#fff;cursor:pointer;min-width:36px;min-height:36px;font-size:18px;line-height:1}
+.opt{font:inherit;font-size:15px;text-align:left;padding:12px 14px;min-height:44px;border-radius:8px;border:1px solid #C3CBC8;background:#fff;color:#1C2629;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%}
+.opt-on{border-color:#0B6763;background:#E3F0EE;color:#084C49;font-weight:600}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid #56636A;flex:none}.dot-on{border:6px solid #0B6763}
+.spotlight{background:#E3F0EE;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:8px}
+.spot-q{font-size:24px;line-height:1.35;font-weight:600;color:#12302E}
+.sechead{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.card{display:flex;flex-direction:column;gap:12px;border:1px solid #C3CBC8;border-radius:10px;padding:14px 16px;background:#fff}
+.card-sug{border-color:#D9A35E;background:#FFFBF4}.card-dim{opacity:.62}
+.card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.card-name{font-weight:700}.card-meta{font-size:14px;color:#56636A}.card-origin{font-size:13px;color:#56636A}
+.ask{display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6EAE8;padding-top:12px}.ask-q{font-weight:600;font-size:15px}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;background:#E6EAE8}
+.pill-warn{background:#FCEFD9;color:#6E3506}.pill-ok{background:#E3F0EE;color:#084C49}.pill-off{background:#F3E1DF;color:#7C231E}
+.results{display:flex;flex-direction:column;border:1px solid #C3CBC8;border-radius:8px;overflow:hidden}
+.result{font:inherit;font-size:15px;text-align:left;padding:10px 14px;min-height:44px;border:none;border-top:1px solid #E6EAE8;background:#fff;color:#1C2629;cursor:pointer}
+.result:first-child{border-top:none}.result:hover{background:#EEF1EF}.result-new{color:#0B6763;font-weight:600}
+.tablewrap{overflow-x:auto;border:1px solid #D9DEDC;border-radius:10px}
+.tbl{display:flex;flex-direction:column;font-size:14px;min-width:640px}
+.tr{display:grid;gap:12px;padding:10px 12px;border-top:1px solid #E6EAE8;grid-template-columns:2.2fr 1fr 1fr 1fr 1fr 1fr 1.2fr}
+.th{background:#F4F5F3;font-weight:600;border-top:none}
+.navrow{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #E6EAE8;padding-top:18px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#7C231E;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;max-width:90vw;z-index:9}
+@media (max-width:600px){
+ .page{padding:16px 12px 48px}.content{padding:18px 16px;gap:18px}.panel{padding:20px 16px}.center{padding:24px 12px 48px}
+ .spotlight{padding:16px}.spot-q{font-size:20px}.card{padding:12px}h1{font-size:24px}
+ .survey-head h1{font-size:20px}.survey-head .eyebrow{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" role="alert" hidden></div>
+<script>
+'use strict';
+// ------------------------------------------------------------------ configuration
+const SUPABASE_URL = 'https://kxohphviyntmvwnbxyqu.supabase.co';
+// Public (anon) key: safe to publish. All access is enforced by the database's row-level security.
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4b2hwaHZpeW50bXZ3bmJ4eXF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwODUwMzQsImV4cCI6MjEwOTY2MTAzNH0.NPvYI9FYBGTXtwX3GzTfvHgEtq9C7dZoU6MkwM3eZKU';
+const CYCLE_LABEL = '2026', PRIOR_LABEL = '2025';
+
+const TOPICS = [
+  { id: 'msg', label: 'Tailoring messaging to high-risk communities', q: 'Which organizations or individuals do you go to when you want assistance making outreach messaging more culturally or linguistically relevant for communities you serve?' },
+  { id: 'out', label: 'Outreach and community mobilization', q: 'Which organizations or individuals do you go to when you want assistance mobilizing your community or constituency around a campaign that addresses an important issue?' },
+  { id: 'emg', label: 'Emergency updates', q: '[Emergency updates question: exact 2025 wording to come from the Alchemer survey]' },
+  { id: 'ideas', label: 'New ideas', q: 'Which organizations or individuals do you go to for new ideas, strategies, or tactics to improve community wellbeing?' },
+  { id: 'data', label: 'Working with data', q: 'Which organizations or individuals do you go to for assistance in obtaining or working with data to support a campaign that addresses an important issue?' }
+];
+const TOPIC = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+const ENG = [['sig', 'We do significant work on this topic and have many partners'], ['few', 'We do some work on this and have a few partners'], ['nop', "We do some work on this but don't have partners"], ['none', 'We do not work on this topic']];
+const COUNTIES = ['Alameda','Alpine','Amador','Butte','Calaveras','Colusa','Contra Costa','Del Norte','El Dorado','Fresno','Glenn','Humboldt','Imperial','Inyo','Kern','Kings','Lake','Lassen','Los Angeles','Madera','Marin','Mariposa','Mendocino','Merced','Modoc','Mono','Monterey','Napa','Nevada','Orange','Placer','Plumas','Riverside','Sacramento','San Benito','San Bernardino','San Diego','San Francisco','San Joaquin','San Luis Obispo','San Mateo','Santa Barbara','Santa Clara','Santa Cruz','Shasta','Sierra','Siskiyou','Solano','Sonoma','Stanislaus','Sutter','Tehama','Trinity','Tulare','Tuolumne','Ventura','Yolo','Yuba'];
+const LANGS = ['English','Spanish','Chinese (including Cantonese and Mandarin)','Vietnamese','Tagalog (including Filipino)','Korean','Armenian','Farsi','Arabic','Russian','Punjabi','Japanese','Hindi','Other'];
+const GROUPS = ['Immigrants and refugees','Farm workers','People with disabilities','Older adults (people aged 65 and older)','People experiencing homelessness','Rural populations','Limited/low broadband','People with limited English proficiency'];
+const COMMS = ['American Indian or Alaska Native','Asian','Black or African American','Hispanic/Latino','Native Hawaiian or Other Pacific Islander','White','Multi-Racial','Other'];
+const STRENGTHS = ['Community door-to-door canvassing','Phone banking','Providing virtual/in-person trainings','Organizing special events','Volunteer recruitment/management','Social media','News/media engagement','Advocacy','Program design','Monitoring/Evaluation','Situational (needs) assessment','Asset-based (strengths-based) programming'];
+const ROLES = ['Executive Director/CEO','Program Director/Manager','Operations Director/Manager','Community Organizer/Outreach','Emergency/Disaster Response Coordinator','Government Official/Staff','Board Member','Volunteer or unpaid staff','Other - Write In (Required)'];
+const PTYPES = [['Community based organization','Community based organization'],['Government Institution','Government institution'],['Foundation','Foundation'],['Business','Business'],['NGO','NGO'],['Religious Group','Religious group'],['Local emergency service office','Local emergency service office'],['Other first responder (fire, police, etc)','Other first responder (fire, police, etc.)'],['Informal group or network','Informal group or network'],['Individual','An individual person'],['Other','Other']];
+const STEPS = ['About your organization'].concat(TOPICS.map(t => t.label)).concat(['Sharing and follow-up', 'Review and submit']);
+
+// ------------------------------------------------------------------ state
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const S = {
+  view: 'loading', email: '', emailError: '', access: null, orgs: [], isAdmin: false,
+  org: null, resp: null, priorResp: null, priorBy: '', priorSummary: '', people: [], log: [],
+  profile: null, eng: {}, ties: [], sugg: null, contacts: {}, corrections: {},
+  step: 0, ui: {}, query: '', results: [], newOrgName: '', adminQuery: '', adminResults: [],
+  saving: 0, savedAt: null
+};
+
+// ------------------------------------------------------------------ helpers
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtTime = d => { const x = new Date(d); return x.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + x.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 6000); }
+async function q(promise, what) {
+  const { data, error } = await promise;
+  if (error) { console.error(what, error); throw new Error((what ? what + ': ' : '') + (error.message || 'request failed')); }
+  return data;
+}
+async function save(fn) {
+  S.saving++; render();
+  try { await fn(); S.savedAt = new Date(); }
+  catch (e) { toast("Couldn't save that change. " + e.message); }
+  finally { S.saving--; render(); }
+}
+function setView(v) { const changed = S.view !== v; S.view = v; render(); if (changed) window.scrollTo(0, 0); }
+
+// ------------------------------------------------------------------ auth and access
+async function init() {
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session && !S.access) afterSignIn();
+    if (event === 'SIGNED_OUT') { Object.assign(S, { access: null, org: null, resp: null }); setView('signin'); }
+  });
+  const { data } = await sb.auth.getSession();
+  if (data.session) await afterSignIn(); else setView('signin');
+}
+async function sendLink() {
+  const email = (document.getElementById('em').value || '').trim().toLowerCase();
+  S.email = email;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { S.emailError = 'Enter a full email address, like name@yourorganization.org.'; return render(); }
+  S.emailError = '';
+  const redirect = location.origin + location.pathname;
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirect } });
+  if (error) { S.emailError = /rate/i.test(error.message) ? 'Too many sign-in emails were sent recently. Please wait a few minutes and try again.' : error.message; return render(); }
+  setView('check');
+}
+async function afterSignIn() {
+  try {
+    const res = await q(sb.rpc('claim_access'), 'Checking your access');
+    S.access = res; S.email = res.email || S.email; S.isAdmin = !!res.is_admin; S.orgs = res.orgs || [];
+    if (res.status === 'member') {
+      if (S.orgs.length === 1) return openOrg(S.orgs[0].id);
+      return setView('pickorg');
+    }
+    if (res.status === 'admin') return setView('admin');
+    if (res.status === 'choose') return setView('choose');
+    return setView('pending');
+  } catch (e) { toast(e.message); setView('signin'); }
+}
+async function signOut() { await sb.auth.signOut(); }
+
+// ------------------------------------------------------------------ organization page
+async function openOrg(orgId) {
+  S.ui = {}; S.step = 0; S.query = ''; S.results = [];
+  const org = await q(sb.from('organizations').select('id,name').eq('id', orgId).single(), 'Loading organization');
+  S.org = org;
+  const resps = await q(sb.from('responses').select('id,cycle_id,source,status,submitted_at,submitted_by,respondent_name,prefilled_from,edited_after_submit').eq('org_id', orgId).order('cycle_id'), 'Loading responses');
+  S.resp = resps.find(r => r.source === 'survey' && r.cycle_id === 4) || null;
+  const prior = resps.filter(r => r.cycle_id < 4);
+  S.priorResp = prior.length ? prior[prior.length - 1] : null;
+  S.priorBy = (S.priorResp && S.priorResp.respondent_name) || '';
+  S.priorSummary = '';
+  if (S.priorResp) {
+    const t = await q(sb.from('ties').select('topic_id').eq('response_id', S.priorResp.id), 'Loading last answers');
+    const topics = new Set(t.map(x => x.topic_id));
+    S.priorSummary = plural(t.length, 'partner', 'partners') + ' across ' + plural(topics.size, 'topic', 'topics') + ', plus your organization profile.';
+  }
+  await loadPeopleAndLog();
+  setView('home');
+}
+async function loadPeopleAndLog() {
+  S.people = await q(sb.from('memberships').select('user_id,email,display_name,via,last_sign_in').eq('org_id', S.org.id).order('created_at'), 'Loading people');
+  const rows = await q(sb.from('audit_log').select('at,actor,table_name,action,details').eq('org_id', S.org.id).order('at', { ascending: false }).limit(60), 'Loading changes');
+  const ids = new Set();
+  rows.forEach(r => { const d = r.details || {}; const a = d.after || d; if (a.to_org) ids.add(a.to_org); if (a.org_id) ids.add(a.org_id); });
+  const names = {};
+  if (ids.size) (await q(sb.from('organizations').select('id,name').in('id', [...ids]), 'Loading names')).forEach(o => { names[o.id] = o.name; });
+  const who = {}; S.people.forEach(p => { who[p.user_id] = p.display_name || p.email; });
+  S.log = rows.map(r => describe(r, names, who)).filter((l, i, all) => l && !(i && all[i - 1] && all[i - 1].who === l.who && all[i - 1].text === l.text)).slice(0, 15);
+}
+function describe(r, names, who) {
+  const d = r.details || {}, a = d.after || d, b = d.before || {};
+  const nm = names[a.to_org] || names[a.org_id] || 'a partner';
+  const tp = a.topic_id && TOPIC[a.topic_id] ? ' (' + TOPIC[a.topic_id].label + ')' : '';
+  const by = who[r.actor] || (r.actor ? 'Someone' : 'Listos team');
+  let text = null;
+  if (r.table_name === 'ties') {
+    if (r.action === 'insert' && a.source === 'added') text = 'added ' + nm + tp;
+    else if (r.action === 'insert' && a.source === 'suggested') text = ({ confirmed: 'confirmed ' + nm + ' as a partner', declined_unknown: "said they don't know " + nm }[a.outcome] || 'said ' + nm + ' is not a partner') + tp;
+    else if (r.action === 'update' && a.outcome !== b.outcome) text = ({ kept: 'said they still work with ' + nm, ended: 'said they no longer work with ' + nm, mistake: 'removed ' + nm + ' (entered by mistake)', unsure: 'marked ' + nm + ' as not sure', not_confirmed: 'undid an answer on ' + nm, confirmed: 'confirmed ' + nm + ' as a partner', declined_not_partner: 'said ' + nm + ' is not a partner', declined_unknown: "said they don't know " + nm })[a.outcome] + tp;
+    else if (r.action === 'update') text = 'added details for ' + nm + tp;
+    else if (r.action === 'delete') text = 'removed ' + nm + tp;
+  } else if (r.table_name === 'engagement') text = 'updated how the organization engages' + tp;
+  else if (r.table_name === 'org_profiles' && r.action === 'update') text = 'updated the organization profile';
+  else if (r.table_name === 'responses') {
+    if (r.action === 'insert') text = 'opened the ' + CYCLE_LABEL + ' survey';
+    else if (a.status === 'submitted' && b.status !== 'submitted') text = 'submitted the survey';
+    else if (a.share_consent !== b.share_consent || a.interview !== b.interview) text = 'answered the sharing and follow-up questions';
+  } else if (r.table_name === 'memberships' && r.action === 'insert') return { t: fmtTime(r.at), who: a.display_name || a.email, text: 'got access' };
+  else if (r.table_name === 'partner_contacts' && r.action === 'insert') text = 'added a contact for ' + nm;
+  else if (r.table_name === 'partner_corrections' && r.action === 'insert') text = 'suggested a correction for ' + nm;
+  return text ? { t: fmtTime(r.at), who: by, text } : null;
+}
+
+// ------------------------------------------------------------------ survey data
+async function startSurvey() {
+  try {
+    const rid = await q(sb.rpc('start_survey', { p_org: S.org.id }), 'Starting the survey');
+    await loadSurvey(rid);
+    setView('survey');
+  } catch (e) { toast(e.message); }
+}
+async function loadSurvey(rid) {
+  const [resp, prof, eng] = await Promise.all([
+    q(sb.from('responses').select('id,status,share_consent,interview,submitted_at,edited_after_submit,prefilled_from').eq('id', rid).single(), 'Loading survey'),
+    q(sb.from('org_profiles').select('*').eq('response_id', rid).maybeSingle(), 'Loading profile'),
+    q(sb.from('engagement').select('topic_id,value').eq('response_id', rid), 'Loading answers')
+  ]);
+  S.resp = resp; S.profile = prof || { response_id: rid, counties: [], languages: [], groups_served: [], communities: [], strengths: [] };
+  S.eng = Object.fromEntries(eng.map(e => [e.topic_id, e.value]));
+  await Promise.all([loadTies(), loadSuggestions(), loadContactsAndCorrections()]);
+}
+async function loadTies() {
+  S.ties = await q(sb.from('ties').select('id,to_org,topic_id,source,outcome,partner_type,partner_groups,partner:organizations!ties_to_org_fkey(name,needs_review)').eq('response_id', S.resp.id).order('created_at'), 'Loading partners');
+}
+async function loadSuggestions() { S.sugg = await q(sb.rpc('get_suggestions', { p_org: S.org.id }), 'Loading suggestions'); }
+async function loadContactsAndCorrections() {
+  const [c, k] = await Promise.all([
+    q(sb.from('partner_contacts').select('org_id,email').eq('response_id', S.resp.id), 'Loading contacts'),
+    q(sb.from('partner_corrections').select('org_id').eq('response_id', S.resp.id), 'Loading corrections')
+  ]);
+  S.contacts = Object.fromEntries(c.map(x => [x.org_id, x.email]));
+  S.corrections = Object.fromEntries(k.map(x => [x.org_id, true]));
+}
+const tie = id => S.ties.find(t => t.id === id);
+const partnerName = t => (t.partner && t.partner.name) || 'Unknown organization';
+
+// ------------------------------------------------------------------ writes
+const saveProfile = patch => save(async () => {
+  Object.assign(S.profile, patch);
+  await q(sb.from('org_profiles').update(patch).eq('response_id', S.resp.id), 'Saving profile');
+});
+const setEng = (topic, value) => save(async () => {
+  S.eng[topic] = value;
+  await q(sb.from('engagement').upsert({ response_id: S.resp.id, topic_id: topic, value }, { onConflict: 'response_id,topic_id' }), 'Saving answer');
+});
+const setOutcome = (id, outcome) => save(async () => {
+  await q(sb.from('ties').update({ outcome }).eq('id', id), 'Saving partner');
+  tie(id).outcome = outcome; delete S.ui['rm' + id];
+});
+const answerSuggestion = (topic, orgId, answer) => save(async () => {
+  await q(sb.rpc('answer_suggestion', { p_org: S.org.id, p_topic: topic, p_namer: orgId, p_answer: answer }), 'Saving answer');
+  delete S.ui['sg' + topic + orgId];
+  await Promise.all([loadSuggestions(), loadTies()]);
+});
+const addPartner = (orgId, isNew) => save(async () => {
+  const topic = TOPICS[S.step - 1].id;
+  const row = await q(sb.from('ties').insert({ response_id: S.resp.id, cycle_id: 4, from_org: S.org.id, to_org: orgId, topic_id: topic, source: 'added', outcome: 'added' }).select('id').single(), 'Adding partner');
+  S.query = ''; S.results = [];
+  if (isNew) S.ui['ed' + row.id] = { type: '', groups: [] };
+  await loadTies();
+});
+const addNewOrg = name => save(async () => {
+  const id = await q(sb.rpc('add_organization', { p_name: name }), 'Adding organization');
+  const topic = TOPICS[S.step - 1].id;
+  if (S.ties.some(t => t.to_org === id && t.topic_id === topic && t.source !== 'suggested')) { S.query = ''; S.results = []; return; }
+  const row = await q(sb.from('ties').insert({ response_id: S.resp.id, cycle_id: 4, from_org: S.org.id, to_org: id, topic_id: topic, source: 'added', outcome: 'added' }).select('id').single(), 'Adding partner');
+  S.query = ''; S.results = []; S.ui['ed' + row.id] = { type: '', groups: [] };
+  await loadTies();
+});
+const removeAdded = id => save(async () => {
+  await q(sb.from('ties').delete().eq('id', id), 'Removing partner');
+  S.ties = S.ties.filter(t => t.id !== id);
+});
+const saveNewDetails = id => save(async () => {
+  const e = S.ui['ed' + id];
+  await q(sb.from('ties').update({ partner_type: e.type || null, partner_groups: e.groups }).eq('id', id), 'Saving details');
+  Object.assign(tie(id), { partner_type: e.type || null, partner_groups: e.groups }); delete S.ui['ed' + id];
+});
+const sendCorrection = id => save(async () => {
+  const t = tie(id), e = S.ui['co' + id];
+  await q(sb.from('partner_corrections').insert({ org_id: t.to_org, response_id: S.resp.id, suggested_type: e.type || null, suggested_groups: e.groups }), 'Sending correction');
+  S.corrections[t.to_org] = true; delete S.ui['co' + id];
+  if (t.outcome === 'not_confirmed') { await q(sb.from('ties').update({ outcome: 'kept' }).eq('id', id), 'Saving partner'); t.outcome = 'kept'; }
+});
+const saveContact = (orgId, email) => save(async () => {
+  email = (email || '').trim().toLowerCase();
+  if (!email) return;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('That contact email does not look complete.');
+  await q(sb.from('partner_contacts').upsert({ org_id: orgId, response_id: S.resp.id, email }, { onConflict: 'org_id,email', ignoreDuplicates: true }), 'Saving contact');
+  S.contacts[orgId] = email;
+});
+const setRespField = (field, value) => save(async () => {
+  await q(sb.from('responses').update({ [field]: value }).eq('id', S.resp.id), 'Saving answer');
+  S.resp[field] = value;
+});
+async function submit() {
+  try {
+    await q(sb.rpc('submit_survey', { p_org: S.org.id }), 'Submitting');
+    await loadSurvey(S.resp.id);
+    setView('done');
+  } catch (e) { toast(e.message); }
+}
+let searchTimer = null;
+function onSearch(value) {
+  S.query = value;
+  clearTimeout(searchTimer);
+  if (value.trim().length < 2) { S.results = []; return renderSearchResults(); }
+  searchTimer = setTimeout(async () => {
+    try {
+      const rows = await q(sb.rpc('search_orgs', { q: value, max_results: 8 }), 'Searching');
+      if (S.query !== value) return;
+      const topic = TOPICS[S.step - 1].id;
+      const taken = new Set(S.ties.filter(t => t.topic_id === topic && !['ended', 'mistake', 'declined_not_partner', 'declined_unknown'].includes(t.outcome)).map(t => t.to_org));
+      taken.add(S.org.id);
+      S.results = rows.filter(r => !taken.has(r.id)).slice(0, 6);
+      renderSearchResults();
+    } catch (e) { toast(e.message); }
+  }, 250);
+}
+let adminTimer = null;
+function onAdminSearch(value) {
+  S.adminQuery = value; clearTimeout(adminTimer);
+  if (value.trim().length < 2) { S.adminResults = []; return render(); }
+  adminTimer = setTimeout(async () => {
+    try { S.adminResults = await q(sb.rpc('search_orgs', { q: value, max_results: 6 }), 'Searching'); render(); document.getElementById('adminq') && document.getElementById('adminq').focus(); }
+    catch (e) { toast(e.message); }
+  }, 300);
+}
+
+// ------------------------------------------------------------------ derived survey values
+const ACTIVE = ['kept', 'added', 'confirmed'];
+function sugItems(topic) { const t = S.sugg && S.sugg.topics && S.sugg.topics[topic]; return (t && t.items) || []; }
+function sugCount(topic) { const t = S.sugg && S.sugg.topics && S.sugg.topics[topic]; return (t && t.count) || 0; }
+function pendingIn(topic) {
+  if (S.eng[topic] === 'none') return 0;
+  const carried = S.ties.filter(t => t.topic_id === topic && t.source === 'carried' && t.outcome === 'not_confirmed').length;
+  const sugg = S.sugg && S.sugg.names_shown ? sugItems(topic).filter(i => !i.answer).length : 0;
+  return carried + sugg;
+}
+
+// ------------------------------------------------------------------ rendering
+function render() {
+  const app = document.getElementById('app');
+  const active = document.activeElement && document.activeElement.id;
+  const caret = active && document.activeElement.selectionStart;
+  app.innerHTML = adminBar() + brand() + ({ loading: viewLoading, signin: viewSignin, check: viewCheck, pending: viewPending, choose: viewChoose, pickorg: viewPickOrg, admin: viewAdmin, home: viewHome, survey: viewSurvey, done: viewDone }[S.view] || viewLoading)();
+  if (active) { const el = document.getElementById(active); if (el) { el.focus(); try { if (caret != null) el.setSelectionRange(caret, caret); } catch (e) {} } }
+}
+function renderSearchResults() { const el = document.getElementById('ta-results'); if (el) el.innerHTML = searchResultsHtml(); }
+const adminBar = () => !S.isAdmin ? '' : `<div class="adminbar" role="region" aria-label="Admin tools"><strong>Admin</strong>
+  <label class="vh" for="adminq">Open any organization</label><input id="adminq" placeholder="Open any organization…" value="${esc(S.adminQuery)}" data-input="admin-search">
+  <span class="res">${S.adminResults.map(r => `<button data-action="open-org" data-id="${r.id}">${esc(r.name)}</button>`).join('')}</span></div>`;
+const brand = () => `<div class="brand"><div><p class="brand-name">Listos California Partner Survey</p><p class="brand-sub">Sent on behalf of Listos California by Valley Vision</p></div>
+  ${S.access ? `<div class="row small"><span class="brand-sub">Signed in as ${esc(S.email)}</span><button class="linkbtn" data-action="signout">Sign out</button></div>` : ''}</div>`;
+const viewLoading = () => `<div class="center"><p class="muted">Loading…</p></div>`;
+const viewSignin = () => `<div class="center"><div class="panel narrow">
+  <h1>Sign in to your organization's survey</h1>
+  <p class="muted">Enter your work email. We'll email you a sign-in link, so there's no password to remember.</p>
+  <div class="field"><label class="lbl" for="em">Work email</label>
+  <input id="em" class="txt" type="email" autocomplete="email" placeholder="name@yourorganization.org" value="${esc(S.email)}" data-enter="send-link">
+  ${S.emailError ? `<p class="err">${esc(S.emailError)}</p>` : ''}</div>
+  <button class="btn primary" data-action="send-link">Email me a sign-in link</button></div></div>`;
+const viewCheck = () => `<div class="center"><div class="panel narrow"><h1>Check your email</h1>
+  <p>We sent a sign-in link to <strong>${esc(S.email)}</strong>. Open it on this device to continue. It works once and expires after an hour.</p>
+  <p class="small muted">Not there after a few minutes? Check your spam folder.</p>
+  <button class="linkbtn" data-action="to-signin">Use a different email</button></div></div>`;
+const viewPending = () => `<div class="center"><div class="panel narrow"><h1>Waiting for approval</h1>
+  <p>${S.access && S.access.personal_email ? `<strong>${esc(S.email)}</strong> is a personal email address, so a` : `We couldn't match <strong>${esc(S.email)}</strong> to an organization on our list, so a`} Listos admin needs to confirm which organization you're with. We'll email you when it's approved.</p>
+  <p class="small muted">If your organization invited you at a different address, sign in with that one instead.</p>
+  <button class="linkbtn" data-action="signout">Use a different email</button></div></div>`;
+const viewChoose = () => `<div class="center"><div class="panel narrow"><h1>Which organization are you with?</h1>
+  <p class="muted">Several organizations use your email domain. Choose yours and a Listos admin will confirm it.</p>
+  <div class="stack">${(S.access.options || []).map(o => `<button class="opt" data-action="choose-org" data-id="${o.id}">${esc(o.name)}</button>`).join('')}</div>
+  <button class="linkbtn" data-action="signout">Use a different email</button></div></div>`;
+const viewPickOrg = () => `<div class="center"><div class="panel narrow"><h1>Choose an organization</h1>
+  <p class="muted">You have access to more than one organization.</p>
+  <div class="stack">${S.orgs.map(o => `<button class="opt" data-action="open-org" data-id="${o.id}">${esc(o.name)}</button>`).join('')}</div></div></div>`;
+const viewAdmin = () => `<div class="center"><div class="panel narrow"><h1>Listos admin</h1>
+  <p>You're signed in as an admin. Use the bar at the top to open any organization's page and survey.</p>
+  <p class="hint">The full admin tools (dashboard, adding people, approvals, the names switch) come in the next build. Anything you change in an organization's survey is saved to that organization.</p></div></div>`;
+
+function statusInfo() {
+  const r = S.resp;
+  if (!r || r.status === 'not_started') return ['Not started', 'status'];
+  if (r.status === 'saved') return ['Saved, not submitted', 'status status-prog'];
+  return [r.edited_after_submit ? 'Submitted · updated since' : 'Submitted', 'status status-done'];
+}
+function viewHome() {
+  const [st, cls] = statusInfo();
+  const hasPrior = !!S.priorSummary;
+  const started = S.resp && S.resp.status !== 'not_started', submitted = S.resp && S.resp.status === 'submitted';
+  const startLabel = submitted ? 'Edit your survey' : started ? 'Continue your survey' : hasPrior ? 'Start from your ' + PRIOR_LABEL + ' answers' : 'Start the survey';
+  return `<div class="page">
+  ${S.isAdmin && !S.orgs.some(o => o.id === S.org.id) ? `<div class="box box-amber small" style="margin-bottom:16px">You're viewing this organization as a Listos admin. Changes you make are saved to its survey.</div>` : ''}
+  <div class="orghead"><div><p class="eyebrow">Your organization</p><h1>${esc(S.org.name)}</h1></div><span class="${cls}">${st}</span></div>
+  <div class="grid2"><div class="col-main"><div class="panel stack">
+    <h2>Your ${CYCLE_LABEL} survey</h2>
+    <p>${hasPrior ? 'Your answers from last time are already filled in. Tell us what has changed: confirm or update each partner, and add new ones.' : 'It takes about 15 minutes, and you can stop and come back at any time.'}</p>
+    ${hasPrior ? `<div class="box"><strong>From your ${PRIOR_LABEL} survey:</strong> ${esc(S.priorSummary)}</div>` : ''}
+    ${submitted ? `<p class="muted">Submitted ${esc(fmtTime(S.resp.submitted_at))}. Anyone at your organization can keep editing until the survey closes.</p>` : ''}
+    ${started && !submitted ? `<p class="muted">Your answers are saved and will be included even if you don't submit. Submitting tells us they're complete.</p>` : ''}
+    <div class="row"><button class="btn primary" data-action="start">${startLabel}</button></div>
+    <div class="consent"><p><strong>How your answers are used.</strong> Your organization's answers go to Valley Vision and Root Change for the Listos California network study. Reports and network maps may show your organization's name and its connections. Answers are kept so you can update them in future rounds, and anyone at your organization who signs in can see and edit them.</p></div>
+  </div></div>
+  <div class="col-side">
+    <div class="panel stack" style="gap:10px"><h3>People with access</h3>
+      ${S.people.length ? S.people.map(p => `<div class="person"><strong>${esc(p.display_name || p.email)}</strong>${p.display_name ? `<span class="small muted">${esc(p.email)}</span>` : ''}<span class="small muted">${p.last_sign_in ? 'Last signed in ' + esc(fmtTime(p.last_sign_in)) : 'Not signed in yet'}</span></div>`).join('') : '<p class="small muted">Only Listos admins so far.</p>'}
+      <p class="small muted">Anyone at your organization can edit. Every change is logged.</p></div>
+    <div class="panel stack" style="gap:8px"><h3>Recent changes</h3>
+      ${S.log.length ? S.log.map(l => `<div class="logitem"><span class="logtime">${esc(l.t)}</span><span><strong>${esc(l.who)}</strong> ${esc(l.text)}</span></div>`).join('') : '<p class="small muted">No changes yet.</p>'}</div>
+  </div></div></div>`;
+}
+
+function viewSurvey() {
+  const savedText = S.saving ? 'Saving…' : S.savedAt ? 'All changes saved · ' + fmtTime(S.savedAt) : 'Changes save automatically';
+  const body = S.step === 0 ? profileHtml() : S.step <= 5 ? topicHtml(TOPICS[S.step - 1]) : S.step === 6 ? closingHtml() : reviewHtml();
+  const nextLabel = S.step < 7 ? 'Next' : (S.resp.status === 'submitted' ? 'Resubmit survey' : 'Submit survey');
+  return `<div class="page">
+  <div class="orghead survey-head"><div><p class="eyebrow">${esc(S.org.name)}</p><h1>${CYCLE_LABEL} Partner Survey</h1></div>
+    <div class="row"><span class="small muted" aria-live="polite">${savedText}</span><button class="btn sm" data-action="go-home">Back to organization page</button></div></div>
+  <section class="content">
+    <div class="progress"><div class="row" style="justify-content:space-between"><p class="small muted">Section ${S.step + 1} of 8</p>
+      <div class="row" style="gap:8px"><label class="small muted" for="jump">Go to</label>
+      <select id="jump" class="txt jump" data-change="jump">${STEPS.map((s, i) => `<option value="${i}"${i === S.step ? ' selected' : ''}>${esc(s)}</option>`).join('')}</select></div></div>
+      <div class="bar" aria-hidden="true"><div class="bar-fill" style="width:${Math.round((S.step + 1) / 8 * 100)}%"></div></div></div>
+    ${body}
+    <div class="navrow"><div>${S.step > 0 ? '<button class="btn" data-action="back">Back</button>' : ''}</div><button class="btn primary" data-action="next">${nextLabel}</button></div>
+  </section></div>`;
+}
+const chip = (label, on, action, attrs, full) => `<button class="chip${on ? ' chip-on' : full ? ' chip-full' : ''}" aria-pressed="${on}" data-action="${action}" ${attrs}>${esc(label)}</button>`;
+function chipField(title, field, options, max, help) {
+  const vals = S.profile[field] || [];
+  const full = max && vals.length >= max;
+  const note = max ? (vals.length > max ? `Last time ${vals.length} were chosen. Please narrow this to your top ${max}.` : (help ? help + ' ' : '') + `Choose your top ${max} (${vals.length} of ${max} chosen).`) : help;
+  return `<div class="field"><h3>${esc(title)}</h3>${note ? `<p class="small muted">${esc(note)}</p>` : ''}
+    <div class="chips">${options.map(o => chip(o, vals.includes(o), 'pchip', `data-field="${field}" data-v="${esc(o)}" data-max="${max || 0}"`, full)).join('')}</div></div>`;
+}
+function profileHtml() {
+  const p = S.profile;
+  const roleIsOther = p.org_role && !ROLES.slice(0, -1).includes(p.org_role);
+  return `<div class="field"><p class="eyebrow">Section 1</p><h2>About your organization</h2>
+    <p class="muted">${S.priorResp ? `We've filled this in from ${S.priorBy ? esc(S.priorBy) + "'s " : 'your '}${PRIOR_LABEL} response. Change anything that's out of date.` : 'Tell us a little about your organization.'}</p></div>
+  <div class="field"><label class="lbl" for="homecounty" style="font-size:16px">Where is your organization based?</label>
+    <p class="small muted">The county of your main office. This can be different from the counties you serve.</p>
+    <select id="homecounty" class="txt" style="max-width:360px" data-change="home"><option value="">Choose a county</option>${COUNTIES.concat(['Outside California']).map(c => `<option${p.home_county === c ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+  <div class="field"><h3>Counties your organization serves</h3>
+    <div class="chips">${(p.counties || []).map(c => `<span class="county">${esc(c)}<button aria-label="Remove ${esc(c)}" data-action="rm-county" data-v="${esc(c)}">×</button></span>`).join('')}</div>
+    <label class="lbl" for="addcounty">Add a county</label>
+    <select id="addcounty" class="txt" style="max-width:360px" data-change="add-county"><option value="">Choose a county</option>${COUNTIES.filter(c => !(p.counties || []).includes(c)).map(c => `<option>${esc(c)}</option>`).join('')}</select></div>
+  ${chipField('Languages your organization serves', 'languages', LANGS, 0, '')}
+  ${chipField('Groups you work with', 'groups_served', GROUPS, 3, 'If you work with several groups regularly.')}
+  ${chipField('Racial and ethnic communities you primarily work with', 'communities', COMMS, 3, '')}
+  ${chipField("Your organization's greatest strengths around campaigning", 'strengths', STRENGTHS, 3, '')}
+  <div class="field"><label class="lbl" for="role" style="font-size:16px">What is your organizational role?</label>
+    <select id="role" class="txt" style="max-width:420px" data-change="role"><option value="">Choose a role</option>${ROLES.map(r => `<option value="${esc(r)}"${p.org_role === r || (roleIsOther && r.startsWith('Other')) ? ' selected' : ''}>${esc(r.replace(' - Write In (Required)', ''))}</option>`).join('')}</select>
+    ${p.org_role && p.org_role.startsWith('Other') || roleIsOther ? `<label class="lbl" for="roleother">Your role</label><input id="roleother" class="txt" style="max-width:420px" value="${esc(roleIsOther ? p.org_role.replace(/^Other: /, '') : '')}" data-blur="role-other">` : ''}
+  </div>`;
+}
+function cardHtml(t) {
+  const ui = S.ui;
+  const nm = partnerName(t), isNewOrg = t.partner && t.partner.needs_review;
+  let meta = t.partner_type || (t.partner_groups && t.partner_groups.length) ? [t.partner_type].concat(t.partner_groups && t.partner_groups.length ? ['Works with ' + t.partner_groups.join(', ').toLowerCase()] : []).filter(Boolean).join(' · ') : (t.source === 'added' && isNewOrg ? 'New organization: add its details' : 'Type and groups already on file');
+  const origin = t.source === 'carried' ? 'From your ' + PRIOR_LABEL + ' survey' + (S.priorBy ? ' · entered by ' + S.priorBy : '') : 'Added in this survey';
+  const pills = { kept: [S.corrections[t.to_org] ? 'Still partners · correction suggested' : 'Still partners', 'pill-ok'], unsure: ['Not sure', 'pill-warn'], ended: ['No longer partners', 'pill-off'], mistake: ['Removed · entered by mistake', 'pill-off'] };
+  const pill = t.source === 'added' ? ['Added', 'pill-ok'] : pills[t.outcome];
+  const dim = ['ended', 'mistake'].includes(t.outcome);
+  let body = '';
+  if (t.source === 'carried') {
+    if (ui['co' + t.id]) body = detailsEditor(t.id, 'co', 'These details are shared by everyone who names this organization. Your correction goes to the Listos team to review.', 'Send correction');
+    else if (ui['rm' + t.id]) body = `<div class="ask"><p class="ask-q">What changed?</p><div class="row">
+      <button class="btn sm" data-action="outcome" data-id="${t.id}" data-v="ended">We stopped working together</button>
+      <button class="btn sm" data-action="outcome" data-id="${t.id}" data-v="mistake">This was entered by mistake</button>
+      <button class="linkbtn" data-action="cancel-rm" data-id="${t.id}">Cancel</button></div></div>`;
+    else if (t.outcome === 'not_confirmed') body = `<div class="ask"><p class="ask-q">Do you still work with them on this?</p><div class="row">
+      <button class="btn sm primary" data-action="outcome" data-id="${t.id}" data-v="kept">Yes, still partners</button>
+      <button class="btn sm" data-action="start-rm" data-id="${t.id}">No, not anymore</button>
+      <button class="btn sm" data-action="outcome" data-id="${t.id}" data-v="unsure">Not sure</button></div>
+      <div><button class="linkbtn" data-action="start-co" data-id="${t.id}">Suggest a correction to their details</button></div></div>`;
+    else body = `<div class="row" style="gap:16px"><button class="linkbtn" data-action="outcome" data-id="${t.id}" data-v="not_confirmed">Undo</button>${t.outcome === 'kept' && !S.corrections[t.to_org] ? `<button class="linkbtn" data-action="start-co" data-id="${t.id}">Suggest a correction to their details</button>` : ''}</div>`;
+  } else if (t.source === 'added') {
+    if (ui['ed' + t.id]) body = detailsEditor(t.id, 'ed', '', 'Save details');
+    else body = contactField(t.to_org) + `<div><button class="linkbtn" data-action="remove-added" data-id="${t.id}">Remove this partner</button></div>`;
+  }
+  return `<div class="card${dim ? ' card-dim' : ''}"><div class="card-top"><div><p class="card-name">${esc(nm)}</p><p class="card-meta">${esc(meta)}</p><p class="card-origin">${esc(origin)}</p></div>
+    ${pill ? `<span class="pill ${pill[1]}">${esc(pill[0])}</span>` : ''}</div>${body}</div>`;
+}
+function detailsEditor(id, kind, note, label) {
+  const e = S.ui[kind + id];
+  return `<div class="field">${note ? `<p class="small muted">${esc(note)}</p>` : ''}
+    <label class="lbl" for="pt${id}">Type of partner</label>
+    <select id="pt${id}" class="txt" style="max-width:360px" data-change="ptype" data-kind="${kind}" data-id="${id}"><option value="">Choose a type</option>${PTYPES.map(p => `<option value="${esc(p[0])}"${e.type === p[0] ? ' selected' : ''}>${esc(p[1])}</option>`).join('')}</select>
+    <p class="lbl">Groups they work with (up to 3)</p>
+    <div class="chips">${GROUPS.map(g => chip(g, e.groups.includes(g), 'gchip', `data-kind="${kind}" data-id="${id}" data-v="${esc(g)}"`, e.groups.length >= 3)).join('')}</div>
+    <div class="row"><button class="btn sm primary" data-action="${kind === 'co' ? 'send-co' : 'save-ed'}" data-id="${id}">${label}</button>${kind === 'co' ? `<button class="linkbtn" data-action="cancel-co" data-id="${id}">Cancel</button>` : ''}</div></div>`;
+}
+function contactField(orgId) {
+  return `<div class="field"><label class="lbl" for="ct${orgId}">Their contact email (optional)</label>
+    <input id="ct${orgId}" class="txt" style="max-width:420px" type="email" placeholder="name@theirorganization.org" value="${esc(S.contacts[orgId] || '')}" data-blur="contact" data-org="${orgId}">
+    <p class="small muted">Helps Valley Vision invite them to the survey. We won't share it.</p></div>`;
+}
+function suggestionHtml(topic, item) {
+  const key = 'sg' + topic + item.org_id;
+  const pill = { confirmed: ['Partner confirmed', 'pill-ok'], declined_not_partner: ['Not a partner', 'pill-off'], declined_unknown: ["We don't know them", 'pill-off'] }[item.answer];
+  let body;
+  if (!item.answer && S.ui[key]) body = `<div class="ask"><p class="ask-q">Which is closer?</p><div class="row">
+    <button class="btn sm" data-action="sugg" data-topic="${topic}" data-org="${item.org_id}" data-v="declined_not_partner">We don't work with them</button>
+    <button class="btn sm" data-action="sugg" data-topic="${topic}" data-org="${item.org_id}" data-v="declined_unknown">We don't know them</button>
+    <button class="linkbtn" data-action="sugg-cancel" data-key="${key}">Cancel</button></div></div>`;
+  else if (!item.answer) body = `<div class="ask"><p class="ask-q">Do you work with them on this?</p><div class="row">
+    <button class="btn sm amber" data-action="sugg" data-topic="${topic}" data-org="${item.org_id}" data-v="confirmed">Yes, we work together</button>
+    <button class="btn sm" data-action="sugg-no" data-key="${key}">No</button></div></div>`;
+  else body = (item.answer === 'confirmed' ? contactField(item.org_id) : '') + `<div><button class="linkbtn" data-action="sugg" data-topic="${topic}" data-org="${item.org_id}" data-v="">Undo</button></div>`;
+  return `<div class="card card-sug${item.answer && item.answer !== 'confirmed' ? ' card-dim' : ''}"><div class="card-top"><div><p class="card-name">${esc(item.name)}</p>
+    <p class="card-meta">Named your organization as a partner for this topic in ${PRIOR_LABEL}</p><p class="card-origin">Suggested from their ${PRIOR_LABEL} answers</p></div>
+    ${pill ? `<span class="pill ${pill[1]}">${esc(pill[0])}</span>` : ''}</div>${body}</div>`;
+}
+function searchResultsHtml() {
+  const q = S.query.trim();
+  if (q.length < 2) return '';
+  const exact = S.results.some(r => r.name.toLowerCase() === q.toLowerCase());
+  const canNew = q.length >= 3 && !exact;
+  if (!S.results.length && !canNew) return '';
+  return `<div class="results">${S.results.map(r => `<button class="result" data-action="add-org" data-id="${r.id}">${esc(r.name)}</button>`).join('')}
+    ${canNew ? `<button class="result result-new" data-action="add-new">${S.results.length ? 'None of these? Add' : 'Add'} "${esc(q)}" as a new organization</button>` : ''}</div>`;
+}
+function topicHtml(topic) {
+  const v = S.eng[topic.id] || '';
+  const carried = S.ties.filter(t => t.topic_id === topic.id && t.source === 'carried');
+  const added = S.ties.filter(t => t.topic_id === topic.id && t.source === 'added');
+  const items = sugItems(topic.id);
+  const active = S.ties.filter(t => t.topic_id === topic.id && ACTIVE.includes(t.outcome)).length;
+  const prefilled = S.resp.prefilled_from && v && S.priorResp;
+  let h = `<div class="spotlight"><p class="eyebrow" style="color:#084C49">Topic ${S.step} of 5 · ${esc(topic.label)}</p><h2 class="spot-q">${esc(topic.q)}</h2></div>
+  <div class="field"><h3>How does your organization engage in this topic?</h3>
+    ${prefilled ? `<p class="small muted">Filled in from your ${PRIOR_LABEL} answer. Change it if things are different now.</p>` : ''}
+    ${ENG.map(([k, l]) => `<button class="opt${v === k ? ' opt-on' : ''}" aria-pressed="${v === k}" data-action="eng" data-topic="${topic.id}" data-v="${k}"><span class="dot${v === k ? ' dot-on' : ''}" aria-hidden="true"></span>${esc(l)}</button>`).join('')}</div>`;
+  if (v === 'nop' && active) h += `<div class="box box-amber small">You chose "no partners" but have ${plural(active, 'partner', 'partners')} below. Please check one or the other.</div>`;
+  if (v === 'none') {
+    return h + `<div class="box">${carried.length ? `You said your organization no longer works on this topic. The ${plural(carried.length, 'partner', 'partners')} you named here in ${PRIOR_LABEL} will be recorded as no longer partners for this topic when you submit.` : "You said your organization doesn't work on this topic, so there are no partners to review here."}</div>`;
+  }
+  if (carried.length) h += `<div class="sechead"><h3>Partners from your ${PRIOR_LABEL} survey</h3><p class="small muted">Tell us whether you still work with each one. A partner only carries forward if you say yes. If you weren't here last year, it's fine to say Not sure.</p></div>` + carried.map(cardHtml).join('');
+  if (S.sugg && S.sugg.names_shown && items.length) h += `<div class="sechead"><h3>Organizations that named you</h3><p class="small muted">These organizations named you as a partner for this topic. Do you work with them?</p></div>` + items.map(i => suggestionHtml(topic.id, i)).join('');
+  else if (sugCount(topic.id)) h += `<div class="box box-amber">${plural(sugCount(topic.id), 'organization', 'organizations')} named you as a partner for this topic in ${PRIOR_LABEL}.</div>`;
+  if (added.length) h += `<div class="sechead"><h3>Added this time</h3></div>` + added.map(cardHtml).join('');
+  h += `<div class="field"><h3>Add a partner</h3><p class="small muted">Start typing. We'll suggest organizations already in the system.</p>
+    <label class="vh" for="ta">Organization name</label><input id="ta" class="txt" type="text" autocomplete="off" placeholder="Start typing an organization's name" value="${esc(S.query)}" data-input="search">
+    <div id="ta-results">${searchResultsHtml()}</div></div>`;
+  return h;
+}
+function radio(field, value, label) {
+  const on = S.resp[field] === value;
+  return `<button class="opt${on ? ' opt-on' : ''}" aria-pressed="${on}" data-action="resp-field" data-field="${field}" data-v="${value}"><span class="dot${on ? ' dot-on' : ''}" aria-hidden="true"></span>${esc(label)}</button>`;
+}
+const closingHtml = () => `<div class="field"><p class="eyebrow">Last questions</p><h2>Sharing and follow-up</h2></div>
+  <div class="field"><h3>Can we let the organizations you named know that you named them as a partner?</h3>
+    <p class="small muted">If yes, they may see your organization's name as a suggested partner when they take the survey. We never share anything else you told us.</p>
+    ${radio('share_consent', 'yes', 'Yes, they can see that we named them')}${radio('share_consent', 'no', 'No, keep our answers private')}</div>
+  <div class="field"><h3>Would you be willing to take part in a follow-up interview?</h3>
+    <p class="small muted">To share more about your organization's experience with topics in this survey, such as neighborhood block parties, summits or networking. If yes, we'll reach out at your email.</p>
+    ${radio('interview', 'yes', 'Yes, feel free to reach out!')}${radio('interview', 'no', 'No, thank you.')}</div>`;
+function reviewHtml() {
+  let pending = 0;
+  const rows = TOPICS.map(t => {
+    const ts = S.ties.filter(x => x.topic_id === t.id), skip = S.eng[t.id] === 'none';
+    const n = f => skip ? '–' : String(ts.filter(f).length);
+    const p = pendingIn(t.id); pending += p;
+    return `<div class="tr" role="row"><span role="cell">${esc(t.label)}${skip ? ' (not our work)' : ''}</span><span role="cell">${n(x => x.source === 'carried' && x.outcome === 'kept')}</span><span role="cell">${skip ? String(ts.filter(x => x.source === 'carried').length) : n(x => x.outcome === 'ended')}</span><span role="cell">${n(x => x.outcome === 'unsure')}</span><span role="cell">${skip ? '–' : p}</span><span role="cell">${n(x => x.source === 'added')}</span><span role="cell">${n(x => x.source === 'suggested' && x.outcome === 'confirmed')}</span></div>`;
+  }).join('');
+  const p = S.profile;
+  return `<div class="field"><p class="eyebrow">Review</p><h2>Review and submit</h2>
+    <p class="muted">Here's what your organization is submitting. Your answers are already saved; submitting tells us they're complete. You can come back and change them until the survey closes.</p></div>
+  <div class="tablewrap"><div class="tbl" role="table" aria-label="Summary by topic">
+    <div class="tr th" role="row"><span role="columnheader">Topic</span><span role="columnheader">Still partners</span><span role="columnheader">Ended</span><span role="columnheader">Not sure</span><span role="columnheader">No answer yet</span><span role="columnheader">Added</span><span role="columnheader">Confirmed suggestions</span></div>${rows}</div></div>
+  <p class="small muted">Organization profile: ${p.home_county ? 'based in ' + esc(p.home_county) + ', ' : ''}${(p.counties || []).length} counties, ${(p.languages || []).length} languages, ${(p.groups_served || []).length} groups, ${(p.communities || []).length} communities, ${(p.strengths || []).length} strengths.</p>
+  ${pending ? `<div class="box box-amber">${plural(pending, 'partner has', 'partners have')} no answer yet. You can still submit: they'll be recorded as not confirmed, which is different from saying the partnership ended. Use Go to to finish them.</div>` : ''}`;
+}
+const viewDone = () => `<div class="center"><div class="panel narrow"><h1>Thank you. Your survey is submitted.</h1>
+  <p>Anyone at ${esc(S.org.name)} can come back and update it until the survey closes. After that, these answers become your starting point next time.</p>
+  <button class="btn primary" data-action="go-home">Back to your organization page</button></div></div>`;
+
+// ------------------------------------------------------------------ events
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-action]'); if (!b) return;
+  const a = b.dataset.action, id = b.dataset.id;
+  switch (a) {
+    case 'send-link': return sendLink();
+    case 'to-signin': S.emailError = ''; return setView('signin');
+    case 'signout': return signOut();
+    case 'choose-org': try { await q(sb.rpc('choose_organization', { p_org: id }), 'Saving your choice'); S.access.status = 'pending'; setView('pending'); } catch (err) { toast(err.message); } return;
+    case 'open-org': S.adminResults = []; S.adminQuery = ''; try { await openOrg(id); } catch (err) { toast(err.message); } return;
+    case 'start': return startSurvey();
+    case 'go-home': try { await openOrg(S.org.id); } catch (err) { toast(err.message); } return;
+    case 'next': if (S.step < 7) { S.step++; S.query = ''; S.results = []; render(); window.scrollTo(0, 0); } else submit(); return;
+    case 'back': if (S.step > 0) { S.step--; S.query = ''; S.results = []; render(); window.scrollTo(0, 0); } return;
+    case 'rm-county': return saveProfile({ counties: (S.profile.counties || []).filter(c => c !== b.dataset.v) });
+    case 'pchip': {
+      const f = b.dataset.field, v = b.dataset.v, max = +b.dataset.max, cur = (S.profile[f] || []).slice();
+      if (cur.includes(v)) return saveProfile({ [f]: cur.filter(x => x !== v) });
+      if (max && cur.length >= max) return;
+      return saveProfile({ [f]: cur.concat(v) });
+    }
+    case 'eng': return setEng(b.dataset.topic, b.dataset.v);
+    case 'outcome': return setOutcome(id, b.dataset.v);
+    case 'start-rm': S.ui['rm' + id] = true; return render();
+    case 'cancel-rm': delete S.ui['rm' + id]; return render();
+    case 'start-co': { const t = tie(id); S.ui['co' + id] = { type: t.partner_type || '', groups: (t.partner_groups || []).slice(0, 3) }; return render(); }
+    case 'cancel-co': delete S.ui['co' + id]; return render();
+    case 'send-co': return sendCorrection(id);
+    case 'gchip': { const e2 = S.ui[b.dataset.kind + id], v = b.dataset.v; if (e2.groups.includes(v)) e2.groups = e2.groups.filter(x => x !== v); else if (e2.groups.length < 3) e2.groups.push(v); return render(); }
+    case 'save-ed': return saveNewDetails(id);
+    case 'remove-added': return removeAdded(id);
+    case 'sugg': return answerSuggestion(b.dataset.topic, b.dataset.org, b.dataset.v || null);
+    case 'sugg-no': S.ui[b.dataset.key] = true; return render();
+    case 'sugg-cancel': delete S.ui[b.dataset.key]; return render();
+    case 'add-org': return addPartner(id, false);
+    case 'add-new': return addNewOrg(S.query.trim());
+    case 'resp-field': return setRespField(b.dataset.field, b.dataset.v);
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target, c = el.dataset.change; if (!c) return;
+  if (c === 'jump') { S.step = +el.value; S.query = ''; S.results = []; render(); window.scrollTo(0, 0); }
+  else if (c === 'home') saveProfile({ home_county: el.value || null });
+  else if (c === 'add-county' && el.value) saveProfile({ counties: (S.profile.counties || []).concat(el.value) });
+  else if (c === 'role') saveProfile({ org_role: el.value || null });
+  else if (c === 'ptype') { S.ui[el.dataset.kind + el.dataset.id].type = el.value; }
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.input === 'search') onSearch(el.value);
+  else if (el.dataset.input === 'admin-search') onAdminSearch(el.value);
+});
+document.addEventListener('focusout', e => {
+  const el = e.target, k = el.dataset && el.dataset.blur; if (!k) return;
+  if (k === 'contact' && el.value.trim() && el.value.trim().toLowerCase() !== (S.contacts[el.dataset.org] || '')) saveContact(el.dataset.org, el.value);
+  if (k === 'role-other' && el.value.trim()) saveProfile({ org_role: 'Other: ' + el.value.trim() });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'send-link') { e.preventDefault(); sendLink(); }
+});
+
+init();
+</script>
+</body>
+</html>
