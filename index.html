@@ -158,11 +158,28 @@ async function init() {
     if (event === 'SIGNED_IN' && session && !S.access) afterSignIn();
     if (event === 'SIGNED_OUT') { Object.assign(S, { access: null, org: null, resp: null }); setView('signin'); }
   });
+  // a sign-in link that failed comes back with the reason in the address (#error=...)
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('error')) {
+    S.emailError = h.get('error_code') === 'otp_expired'
+      ? 'That sign-in link has expired or was already used. Some email systems open links to scan them, which uses them up. Send a new one, then type the code from the email instead of clicking.'
+      : 'Sign-in did not work: ' + (h.get('error_description') || h.get('error'));
+    history.replaceState(null, '', location.pathname + location.search);
+  }
   const { data } = await sb.auth.getSession();
   if (data.session) await afterSignIn(); else setView('signin');
 }
+async function verifyCode() {
+  const code = (document.getElementById('code').value || '').replace(/\D/g, '');
+  if (code.length < 6) { S.codeError = 'Enter the code from the email.'; return render(); }
+  S.codeError = ''; S.verifying = true; render();
+  const { error } = await sb.auth.verifyOtp({ email: S.email, token: code, type: 'email' });
+  S.verifying = false;
+  if (error) { S.codeError = /expired|invalid/i.test(error.message) ? 'That code has expired or is not right. Check the newest email, or send a new code.' : error.message; return render(); }
+  if (!S.access) await afterSignIn();
+}
 async function sendLink() {
-  const email = (document.getElementById('em').value || '').trim().toLowerCase();
+  const email = (document.getElementById('em').value || '').trim().toLowerCase(); S.codeError = '';
   S.email = email;
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { S.emailError = 'Enter a full email address, like name@yourorganization.org.'; return render(); }
   S.emailError = '';
@@ -399,9 +416,13 @@ const viewSignin = () => `<div class="center"><div class="panel narrow">
   ${S.emailError ? `<p class="err">${esc(S.emailError)}</p>` : ''}</div>
   <button class="btn primary" data-action="send-link">Email me a sign-in link</button></div></div>`;
 const viewCheck = () => `<div class="center"><div class="panel narrow"><h1>Check your email</h1>
-  <p>We sent a sign-in link to <strong>${esc(S.email)}</strong>. Open it on this device to continue. It works once and expires after an hour.</p>
-  <p class="small muted">Not there after a few minutes? Check your spam folder.</p>
-  <button class="linkbtn" data-action="to-signin">Use a different email</button></div></div>`;
+  <p>We sent an email to <strong>${esc(S.email)}</strong> with a sign-in link and a code. Click the link, or type the code here.</p>
+  <div class="field"><label class="lbl" for="code">Code from the email</label>
+  <input id="code" class="txt" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" style="max-width:200px;letter-spacing:.15em;font-size:20px" data-enter="verify-code">
+  ${S.codeError ? `<p class="err">${esc(S.codeError)}</p>` : ''}</div>
+  <button class="btn primary" data-action="verify-code" ${S.verifying ? 'disabled' : ''}>${S.verifying ? 'Checking…' : 'Sign in'}</button>
+  <p class="small muted">Not there after a few minutes? Check your spam folder. The code and link work once and expire after an hour.</p>
+  <div class="row"><button class="linkbtn" data-action="send-link-again">Send a new email</button><button class="linkbtn" data-action="to-signin">Use a different email</button></div></div></div>`;
 const viewPending = () => `<div class="center"><div class="panel narrow"><h1>Waiting for approval</h1>
   <p>${S.access && S.access.personal_email ? `<strong>${esc(S.email)}</strong> is a personal email address, so a` : `We couldn't match <strong>${esc(S.email)}</strong> to an organization on our list, so a`} Listos admin needs to confirm which organization you're with. We'll email you when it's approved.</p>
   <p class="small muted">If your organization invited you at a different address, sign in with that one instead.</p>
@@ -622,7 +643,9 @@ document.addEventListener('click', async e => {
   const a = b.dataset.action, id = b.dataset.id;
   switch (a) {
     case 'send-link': return sendLink();
-    case 'to-signin': S.emailError = ''; return setView('signin');
+    case 'to-signin': S.emailError = ''; S.codeError = ''; return setView('signin');
+    case 'verify-code': return verifyCode();
+    case 'send-link-again': { const { error } = await sb.auth.signInWithOtp({ email: S.email, options: { emailRedirectTo: location.origin + location.pathname } }); S.codeError = error ? error.message : 'A new email is on its way. Use the newest code.'; return render(); }
     case 'signout': return signOut();
     case 'choose-org': try { await q(sb.rpc('choose_organization', { p_org: id }), 'Saving your choice'); S.access.status = 'pending'; setView('pending'); } catch (err) { toast(err.message); } return;
     case 'open-org': S.adminResults = []; S.adminQuery = ''; try { await openOrg(id); } catch (err) { toast(err.message); } return;
@@ -675,6 +698,7 @@ document.addEventListener('focusout', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'send-link') { e.preventDefault(); sendLink(); }
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'verify-code') { e.preventDefault(); verifyCode(); }
 });
 
 init();
