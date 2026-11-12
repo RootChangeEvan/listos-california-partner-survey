@@ -8,7 +8,7 @@ Listos Pando Build
 | | |
 |---|---|
 | Client / group | listos |
-| Last deployed | 2026-11-09 13:25 by RootChangeEvan |
+| Last deployed | 2026-11-12 16:00 by RootChangeEvan |
 | History | [CHANGELOG.md](CHANGELOG.md) |
 
 ### Files

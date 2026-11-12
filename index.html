@@ -63,6 +63,11 @@ label.lbl,.lbl{font-weight:600;font-size:14px}
 .chip{font:inherit;font-size:14px;padding:8px 14px;min-height:40px;border-radius:999px;border:1px solid #9AA6A3;background:#fff;color:#1C2629;cursor:pointer}
 .chip-on{background:#0B6763;border-color:#0B6763;color:#fff}
 .chip-full{color:#56636A;border-style:dashed;cursor:not-allowed}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.bbox{font:inherit;font-size:14px;text-align:left;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;min-height:52px;border:1px solid #C3CBC8;border-radius:8px;background:#fff;color:#1C2629;cursor:pointer;line-height:1.35}
+.bbox .tick{flex:none;width:18px;height:18px;border:2px solid #56636A;border-radius:4px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+.bbox-on{border-color:#0B6763;background:#E3F0EE;color:#084C49;font-weight:600}.bbox-on .tick{background:#0B6763;border-color:#0B6763}
+.bbox-full{color:#8A9599;border-style:dashed;cursor:not-allowed}.bbox-full .tick{border-color:#B8C0BE}
 .county{display:inline-flex;align-items:center;gap:4px;font-size:14px;padding:4px 4px 4px 14px;border-radius:999px;background:#0B6763;color:#fff}
 .county button{font:inherit;background:transparent;border:none;color:#fff;cursor:pointer;min-width:36px;min-height:36px;font-size:18px;line-height:1}
 .opt{font:inherit;font-size:15px;text-align:left;padding:12px 14px;min-height:44px;border-radius:8px;border:1px solid #C3CBC8;background:#fff;color:#1C2629;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%}
@@ -82,8 +87,8 @@ label.lbl,.lbl{font-weight:600;font-size:14px}
 .result{font:inherit;font-size:15px;text-align:left;padding:10px 14px;min-height:44px;border:none;border-top:1px solid #E6EAE8;background:#fff;color:#1C2629;cursor:pointer}
 .result:first-child{border-top:none}.result:hover{background:#EEF1EF}.result-new{color:#0B6763;font-weight:600}
 .tablewrap{overflow-x:auto;border:1px solid #D9DEDC;border-radius:10px}
-.tbl{display:flex;flex-direction:column;font-size:14px;min-width:640px}
-.tr{display:grid;gap:12px;padding:10px 12px;border-top:1px solid #E6EAE8;grid-template-columns:2.2fr 1fr 1fr 1fr 1fr 1fr 1.2fr}
+.tbl{display:flex;flex-direction:column;font-size:14px;min-width:720px}
+.tr{display:grid;gap:12px;padding:10px 12px;border-top:1px solid #E6EAE8;grid-template-columns:2.2fr 1fr 1fr 1fr 1fr 1fr 1.2fr 1fr}
 .th{background:#F4F5F3;font-weight:600;border-top:none}
 .navrow{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #E6EAE8;padding-top:18px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -116,7 +121,16 @@ const TOPICS = [
   { id: 'data', label: 'Working with data', q: 'Which organizations or individuals do you go to for assistance in obtaining or working with data to support a campaign that addresses an important issue?' }
 ];
 const TOPIC = Object.fromEntries(TOPICS.map(t => [t.id, t]));
-const ENG = [['sig', 'We do significant work on this topic and have many partners'], ['few', 'We do some work on this and have a few partners'], ['nop', "We do some work on this but don't have partners"], ['none', 'We do not work on this topic']];
+// Barriers, asked on each topic page (choose up to 3). Codes are stored; labels can be reworded without changing data.
+const BARRIER_CORE = [['unknown_local', 'Not knowing who else is doing this work in our area'], ['funding', 'Funding that ends or changes from year to year'], ['turnover', 'Losing relationships when staff or volunteers leave'], ['capacity', 'Not enough staff time or capacity'], ['followthrough', "Connections from meetings and summits don't last"]];
+const BARRIER_TOPIC = {
+  msg: { q: 'What makes it hard to work with partners on tailoring messages for your communities?', extra: [['language_culture', 'Reaching people in their language and culture, beyond translation'], ['trusted_messengers', 'Finding trusted messengers'], ['materials_fit', "Materials arrive too late or don't fit local needs"]] },
+  out: { q: 'What makes it hard to work with partners on outreach and mobilizing your community?', extra: [['rural_internet', 'Reaching rural or low-internet communities'], ['distrust_fatigue', 'Community distrust or fatigue'], ['oes_coordination', 'Hard to coordinate with county or city emergency offices']] },
+  emg: { q: 'What makes it hard to work with partners on sharing emergency updates?', extra: [['timely_info', 'Getting timely, reliable information during an emergency'], ['oes_coordination', 'Hard to coordinate with county or city emergency offices'], ['language_speed', "Updates don't reach people in their language fast enough"]] },
+  ideas: { q: 'What makes it hard to learn new ideas and approaches from partners?', extra: [['no_time_learn', 'No time or space to learn from peers'], ['no_examples', 'Hard to find examples from communities like ours'], ['statewide_fit', "Statewide approaches don't fit our local context"]] },
+  data: { q: 'What makes it hard to work with partners on getting or using data?', extra: [['data_unavailable', "Data isn't available for our area or communities"], ['data_skills', 'Lacking the skills or tools to use data'], ['gov_data', 'Hard to get data from government agencies']] }
+};
+const barrierOptions = t => BARRIER_TOPIC[t].extra.concat(BARRIER_CORE, [['other', 'Other']]);
 const COUNTIES = ['Alameda','Alpine','Amador','Butte','Calaveras','Colusa','Contra Costa','Del Norte','El Dorado','Fresno','Glenn','Humboldt','Imperial','Inyo','Kern','Kings','Lake','Lassen','Los Angeles','Madera','Marin','Mariposa','Mendocino','Merced','Modoc','Mono','Monterey','Napa','Nevada','Orange','Placer','Plumas','Riverside','Sacramento','San Benito','San Bernardino','San Diego','San Francisco','San Joaquin','San Luis Obispo','San Mateo','Santa Barbara','Santa Clara','Santa Cruz','Shasta','Sierra','Siskiyou','Solano','Sonoma','Stanislaus','Sutter','Tehama','Trinity','Tulare','Tuolumne','Ventura','Yolo','Yuba'];
 const LANGS = ['English','Spanish','Chinese (including Cantonese and Mandarin)','Vietnamese','Tagalog (including Filipino)','Korean','Armenian','Farsi','Arabic','Russian','Punjabi','Japanese','Hindi','Other'];
 const GROUPS = ['Immigrants and refugees','Farm workers','People with disabilities','Older adults (people aged 65 and older)','People experiencing homelessness','Rural populations','Limited/low broadband','People with limited English proficiency'];
@@ -131,7 +145,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const S = {
   view: 'loading', email: '', emailError: '', access: null, orgs: [], isAdmin: false,
   org: null, resp: null, priorResp: null, priorBy: '', priorSummary: '', people: [], log: [],
-  profile: null, eng: {}, ties: [], sugg: null, contacts: {}, corrections: {},
+  profile: null, bar: {}, barTouched: {}, ties: [], sugg: null, contacts: {}, corrections: {},
   step: 0, ui: {}, query: '', results: [], newOrgName: '', adminQuery: '', adminResults: [],
   saving: 0, savedAt: null
 };
@@ -253,7 +267,7 @@ function describe(r, names, who) {
     else if (r.action === 'update' && a.outcome !== b.outcome) text = ({ kept: 'said they still work with ' + nm, ended: 'said they no longer work with ' + nm, mistake: 'removed ' + nm + ' (entered by mistake)', unsure: 'marked ' + nm + ' as not sure', not_confirmed: 'undid an answer on ' + nm, confirmed: 'confirmed ' + nm + ' as a partner', declined_not_partner: 'said ' + nm + ' is not a partner', declined_unknown: "said they don't know " + nm })[a.outcome] + tp;
     else if (r.action === 'update') text = 'added details for ' + nm + tp;
     else if (r.action === 'delete') text = 'removed ' + nm + tp;
-  } else if (r.table_name === 'engagement') text = 'updated how the organization engages' + tp;
+  } else if (r.table_name === 'barriers') text = 'updated the barriers' + tp;
   else if (r.table_name === 'org_profiles' && r.action === 'update') text = 'updated the organization profile';
   else if (r.table_name === 'responses') {
     if (r.action === 'insert') text = 'opened the ' + CYCLE_LABEL + ' survey';
@@ -277,10 +291,10 @@ async function loadSurvey(rid) {
   const [resp, prof, eng] = await Promise.all([
     q(sb.from('responses').select('id,status,share_consent,interview,submitted_at,edited_after_submit,prefilled_from').eq('id', rid).single(), 'Loading survey'),
     q(sb.from('org_profiles').select('*').eq('response_id', rid).maybeSingle(), 'Loading profile'),
-    q(sb.from('engagement').select('topic_id,value').eq('response_id', rid), 'Loading answers')
+    q(sb.from('barriers').select('topic_id,choices,other_text').eq('response_id', rid), 'Loading answers')
   ]);
   S.resp = resp; S.profile = prof || { response_id: rid, counties: [], languages: [], groups_served: [], communities: [], strengths: [] };
-  S.eng = Object.fromEntries(eng.map(e => [e.topic_id, e.value]));
+  S.bar = Object.fromEntries(eng.map(e => [e.topic_id, { choices: e.choices || [], other_text: e.other_text || '' }]));
   await Promise.all([loadTies(), loadSuggestions(), loadContactsAndCorrections()]);
 }
 async function loadTies() {
@@ -303,9 +317,12 @@ const saveProfile = patch => save(async () => {
   Object.assign(S.profile, patch);
   await q(sb.from('org_profiles').update(patch).eq('response_id', S.resp.id), 'Saving profile');
 });
-const setEng = (topic, value) => save(async () => {
-  S.eng[topic] = value;
-  await q(sb.from('engagement').upsert({ response_id: S.resp.id, topic_id: topic, value }, { onConflict: 'response_id,topic_id' }), 'Saving answer');
+const saveBarrier = (topic, patch) => save(async () => {
+  const cur = S.bar[topic] || { choices: [], other_text: '' };
+  const next = Object.assign({}, cur, patch);
+  if (!next.choices.includes('other')) next.other_text = '';
+  S.bar[topic] = next;
+  await q(sb.from('barriers').upsert({ response_id: S.resp.id, topic_id: topic, choices: next.choices, other_text: next.other_text || null }, { onConflict: 'response_id,topic_id' }), 'Saving answer');
 });
 const setOutcome = (id, outcome) => save(async () => {
   await q(sb.from('ties').update({ outcome }).eq('id', id), 'Saving partner');
@@ -396,7 +413,6 @@ const ACTIVE = ['kept', 'added', 'confirmed'];
 function sugItems(topic) { const t = S.sugg && S.sugg.topics && S.sugg.topics[topic]; return (t && t.items) || []; }
 function sugCount(topic) { const t = S.sugg && S.sugg.topics && S.sugg.topics[topic]; return (t && t.count) || 0; }
 function pendingIn(topic) {
-  if (S.eng[topic] === 'none') return 0;
   const carried = S.ties.filter(t => t.topic_id === topic && t.source === 'carried' && t.outcome === 'not_confirmed').length;
   const sugg = S.sugg && S.sugg.names_shown ? sugItems(topic).filter(i => !i.answer).length : 0;
   return carried + sugg;
@@ -596,20 +612,10 @@ function searchResultsHtml() {
     ${canNew ? `<button class="result result-new" data-action="add-new">${S.results.length ? 'None of these? Add' : 'Add'} "${esc(q)}" as a new organization</button>` : ''}</div>`;
 }
 function topicHtml(topic) {
-  const v = S.eng[topic.id] || '';
   const carried = S.ties.filter(t => t.topic_id === topic.id && t.source === 'carried');
   const added = S.ties.filter(t => t.topic_id === topic.id && t.source === 'added');
   const items = sugItems(topic.id);
-  const active = S.ties.filter(t => t.topic_id === topic.id && ACTIVE.includes(t.outcome)).length;
-  const prefilled = S.resp.prefilled_from && v && S.priorResp;
-  let h = `<div class="spotlight"><p class="eyebrow" style="color:#084C49">Topic ${S.step} of 5 · ${esc(topic.label)}</p><h2 class="spot-q">${esc(topic.q)}</h2></div>
-  <div class="field"><h3>How does your organization engage in this topic?</h3>
-    ${prefilled ? `<p class="small muted">Filled in from your ${PRIOR_LABEL} answer. Change it if things are different now.</p>` : ''}
-    ${ENG.map(([k, l]) => `<button class="opt${v === k ? ' opt-on' : ''}" aria-pressed="${v === k}" data-action="eng" data-topic="${topic.id}" data-v="${k}"><span class="dot${v === k ? ' dot-on' : ''}" aria-hidden="true"></span>${esc(l)}</button>`).join('')}</div>`;
-  if (v === 'nop' && active) h += `<div class="box box-amber small">You chose "no partners" but have ${plural(active, 'partner', 'partners')} below. Please check one or the other.</div>`;
-  if (v === 'none') {
-    return h + `<div class="box">${carried.length ? `You said your organization no longer works on this topic. The ${plural(carried.length, 'partner', 'partners')} you named here in ${PRIOR_LABEL} will be recorded as no longer partners for this topic when you submit.` : "You said your organization doesn't work on this topic, so there are no partners to review here."}</div>`;
-  }
+  let h = `<div class="spotlight"><p class="eyebrow" style="color:#084C49">Topic ${S.step} of 5 · ${esc(topic.label)}</p><h2 class="spot-q">${esc(topic.q)}</h2></div>`;
   if (carried.length) h += `<div class="sechead"><h3>Partners from your ${PRIOR_LABEL} survey</h3><p class="small muted">Tell us whether you still work with each one. A partner only carries forward if you say yes. If you weren't here last year, it's fine to say Not sure.</p></div>` + carried.map(cardHtml).join('');
   if (S.sugg && S.sugg.names_shown && items.length) h += `<div class="sechead"><h3>Organizations that named you</h3><p class="small muted">These organizations named you as a partner for this topic. Do you work with them?</p></div>` + items.map(i => suggestionHtml(topic.id, i)).join('');
   else if (sugCount(topic.id)) h += `<div class="box box-amber">${plural(sugCount(topic.id), 'organization', 'organizations')} named you as a partner for this topic in ${PRIOR_LABEL}.</div>`;
@@ -617,7 +623,15 @@ function topicHtml(topic) {
   h += `<div class="field"><h3>Add a partner</h3><p class="small muted">Start typing. We'll suggest organizations already in the system.</p>
     <label class="vh" for="ta">Organization name</label><input id="ta" class="txt" type="text" autocomplete="off" placeholder="Start typing an organization's name" value="${esc(S.query)}" data-input="search">
     <div id="ta-results">${searchResultsHtml()}</div></div>`;
-  return h;
+  return h + barrierHtml(topic.id);
+}
+function barrierHtml(t) {
+  const cur = S.bar[t] || { choices: [], other_text: '' }, vals = cur.choices, full = vals.length >= 3;
+  const prefilled = S.priorResp && S.resp.prefilled_from && vals.length && !S.barTouched[t];
+  return `<div class="field" style="border-top:1px solid #E6EAE8;padding-top:20px"><h3>${esc(BARRIER_TOPIC[t].q)}</h3>
+    <p class="small muted">${prefilled ? `Filled in from your ${PRIOR_LABEL} answer. Change it if things are different now. ` : ''}Optional. Choose up to 3 (${vals.length} of 3 chosen).</p>
+    <div class="bgrid">${barrierOptions(t).map(([k, l]) => { const on = vals.includes(k); return `<button class="bbox${on ? ' bbox-on' : full ? ' bbox-full' : ''}" aria-pressed="${on}" data-action="bchip" data-topic="${t}" data-v="${k}"><span class="tick" aria-hidden="true">${on ? '✓' : ''}</span><span>${esc(l)}</span></button>`; }).join('')}</div>
+    ${vals.includes('other') ? `<label class="lbl" for="bo-${t}">Please describe (a few words is fine)</label><input id="bo-${t}" class="txt" maxlength="300" value="${esc(cur.other_text)}" data-blur="barrier-other" data-topic="${t}">` : ''}</div>`;
 }
 function radio(field, value, label) {
   const on = S.resp[field] === value;
@@ -633,16 +647,17 @@ const closingHtml = () => `<div class="field"><p class="eyebrow">Last questions<
 function reviewHtml() {
   let pending = 0;
   const rows = TOPICS.map(t => {
-    const ts = S.ties.filter(x => x.topic_id === t.id), skip = S.eng[t.id] === 'none';
-    const n = f => skip ? '–' : String(ts.filter(f).length);
+    const ts = S.ties.filter(x => x.topic_id === t.id);
+    const n = f => String(ts.filter(f).length);
+    const nb = ((S.bar[t.id] || {}).choices || []).length;
     const p = pendingIn(t.id); pending += p;
-    return `<div class="tr" role="row"><span role="cell">${esc(t.label)}${skip ? ' (not our work)' : ''}</span><span role="cell">${n(x => x.source === 'carried' && x.outcome === 'kept')}</span><span role="cell">${skip ? String(ts.filter(x => x.source === 'carried').length) : n(x => x.outcome === 'ended')}</span><span role="cell">${n(x => x.outcome === 'unsure')}</span><span role="cell">${skip ? '–' : p}</span><span role="cell">${n(x => x.source === 'added')}</span><span role="cell">${n(x => x.source === 'suggested' && x.outcome === 'confirmed')}</span></div>`;
+    return `<div class="tr" role="row"><span role="cell">${esc(t.label)}</span><span role="cell">${n(x => x.source === 'carried' && x.outcome === 'kept')}</span><span role="cell">${n(x => x.outcome === 'ended')}</span><span role="cell">${n(x => x.outcome === 'unsure')}</span><span role="cell">${p}</span><span role="cell">${n(x => x.source === 'added')}</span><span role="cell">${n(x => x.source === 'suggested' && x.outcome === 'confirmed')}</span><span role="cell">${nb ? nb + ' chosen' : '–'}</span></div>`;
   }).join('');
   const p = S.profile;
   return `<div class="field"><p class="eyebrow">Review</p><h2>Review and submit</h2>
     <p class="muted">Here's what your organization is submitting. Your answers are already saved; submitting tells us they're complete. You can come back and change them until the survey closes.</p></div>
   <div class="tablewrap"><div class="tbl" role="table" aria-label="Summary by topic">
-    <div class="tr th" role="row"><span role="columnheader">Topic</span><span role="columnheader">Still partners</span><span role="columnheader">Ended</span><span role="columnheader">Not sure</span><span role="columnheader">No answer yet</span><span role="columnheader">Added</span><span role="columnheader">Confirmed suggestions</span></div>${rows}</div></div>
+    <div class="tr th" role="row"><span role="columnheader">Topic</span><span role="columnheader">Still partners</span><span role="columnheader">Ended</span><span role="columnheader">Not sure</span><span role="columnheader">No answer yet</span><span role="columnheader">Added</span><span role="columnheader">Confirmed suggestions</span><span role="columnheader">Barriers</span></div>${rows}</div></div>
   <p class="small muted">Organization profile: ${p.home_county ? 'based in ' + esc(p.home_county) + ', ' : ''}${(p.counties || []).length} counties, ${(p.languages || []).length} languages, ${(p.groups_served || []).length} groups, ${(p.communities || []).length} communities, ${(p.strengths || []).length} strengths.</p>
   ${pending ? `<div class="box box-amber">${plural(pending, 'partner has', 'partners have')} no answer yet. You can still submit: they'll be recorded as not confirmed, which is different from saying the partnership ended. Use Go to to finish them.</div>` : ''}`;
 }
@@ -675,7 +690,13 @@ document.addEventListener('click', async e => {
       if (max && cur.length >= max) return;
       return saveProfile({ [f]: cur.concat(v) });
     }
-    case 'eng': return setEng(b.dataset.topic, b.dataset.v);
+    case 'bchip': {
+      const t = b.dataset.topic, v = b.dataset.v, cur = ((S.bar[t] || {}).choices || []).slice();
+      S.barTouched[t] = true;
+      if (cur.includes(v)) return saveBarrier(t, { choices: cur.filter(x => x !== v) });
+      if (cur.length >= 3) return;
+      return saveBarrier(t, { choices: cur.concat(v) });
+    }
     case 'outcome': return setOutcome(id, b.dataset.v);
     case 'start-rm': S.ui['rm' + id] = true; return render();
     case 'cancel-rm': delete S.ui['rm' + id]; return render();
@@ -710,6 +731,7 @@ document.addEventListener('focusout', e => {
   const el = e.target, k = el.dataset && el.dataset.blur; if (!k) return;
   if (k === 'contact' && el.value.trim() && el.value.trim().toLowerCase() !== (S.contacts[el.dataset.org] || '')) saveContact(el.dataset.org, el.value);
   if (k === 'role-other' && el.value.trim()) saveProfile({ org_role: 'Other: ' + el.value.trim() });
+  if (k === 'barrier-other' && el.value.trim() !== ((S.bar[el.dataset.topic] || {}).other_text || '')) saveBarrier(el.dataset.topic, { other_text: el.value.trim() });
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter === 'send-link') { e.preventDefault(); sendLink(); }
